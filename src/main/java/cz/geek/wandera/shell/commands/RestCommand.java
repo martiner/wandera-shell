@@ -2,12 +2,13 @@ package cz.geek.wandera.shell.commands;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
+import static org.springframework.shell.standard.ShellOption.NULL;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,18 +39,19 @@ public class RestCommand {
 	}
 
 	@ShellMethod("Issue GET request")
-	public String get(String uri) throws IOException {
+	public String get(String uri, @ShellOption(defaultValue = NULL) File target,
+			@ShellOption(defaultValue = "false") boolean raw) throws IOException {
 		ResponseEntity<byte[]> response = service.get(uri, byte[].class);
-		return processResponse(response, null, false);
+		return processResponse(response, target, raw);
 	}
 
-	private String processResponse(ResponseEntity<byte[]> response, Path target, boolean raw) throws IOException {
+	private String processResponse(ResponseEntity<byte[]> response, File target, boolean raw) throws IOException {
 		if (response.getBody() == null) {
 			return "Status: " + response.getStatusCode();
 		} else if (target != null) {
-			try (OutputStream output = Files.newOutputStream(target)) {
+			try (OutputStream output = Files.newOutputStream(target.toPath())) {
 				final int length = IOUtils.copy(new ByteArrayInputStream(response.getBody()), output);
-				return "Status: " + response.getStatusCode() + " " + target.toAbsolutePath() + ": " + length + " bytes";
+				return "Status: " + response.getStatusCode() + " " + target.getAbsolutePath() + ": " + length + " bytes";
 			}
 		} else if (!raw && isCompatible(response.getHeaders())) {
 			final JsonNode tree = mapper.readTree(response.getBody());
