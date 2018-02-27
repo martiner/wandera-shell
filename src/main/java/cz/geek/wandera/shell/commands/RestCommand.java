@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import cz.geek.wandera.shell.rest.RestService;
+import net.thisptr.jackson.jq.JsonQuery;
+import net.thisptr.jackson.jq.exception.JsonQueryException;
 
 @ShellComponent
 public class RestCommand {
@@ -39,26 +41,41 @@ public class RestCommand {
 	}
 
 	@ShellMethod("Issue GET request")
-	public String get(String uri, @ShellOption(defaultValue = NULL) File target,
+	public String get(String uri, @ShellOption(defaultValue = NULL) String jq,
+			@ShellOption(defaultValue = NULL) File target,
 			@ShellOption(defaultValue = "false") boolean raw) throws IOException {
 		ResponseEntity<byte[]> response = service.get(uri, byte[].class);
-		return processResponse(response, target, raw);
+		return processResponse(response, jq, target, raw);
 	}
 
-	private String processResponse(ResponseEntity<byte[]> response, File target, boolean raw) throws IOException {
+	private String processResponse(ResponseEntity<byte[]> response, String jq, File target, boolean raw) throws IOException {
 		if (response.getBody() == null) {
 			return "Status: " + response.getStatusCode();
-		} else if (target != null) {
+		}
+
+		boolean jsonCompatible = isCompatible(response.getHeaders());
+		if ((jq != null || !raw) && jsonCompatible) {
+			final JsonNode tree = mapper.readTree(response.getBody());
+			if (jq != null) {
+				try {
+					JsonQuery q = JsonQuery.compile(jq);
+					List<JsonNode> result = q.apply(tree);
+					return (result.size() == 1 ? result.get(0) : result).toString();
+				} catch (JsonQueryException e) {
+					throw new IllegalArgumentException(e.getMessage(), e);
+				}
+			}
+			return mapper.writeValueAsString(tree);
+		}
+
+		if (target != null) {
 			try (OutputStream output = Files.newOutputStream(target.toPath())) {
 				final int length = IOUtils.copy(new ByteArrayInputStream(response.getBody()), output);
 				return "Status: " + response.getStatusCode() + " " + target.getAbsolutePath() + ": " + length + " bytes";
 			}
-		} else if (!raw && isCompatible(response.getHeaders())) {
-			final JsonNode tree = mapper.readTree(response.getBody());
-			return mapper.writeValueAsString(tree);
-		} else {
-			return new String(response.getBody());
 		}
+
+		return new String(response.getBody());
 	}
 
 	private static boolean isCompatible(final HttpHeaders headers) {
