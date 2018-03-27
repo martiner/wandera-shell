@@ -16,6 +16,7 @@ public class RestService {
 	public RestService(RestTemplateBuilder builder, WanderaSigningInterceptor signingInterceptor) {
 		this.restTemplate = builder
 				.additionalInterceptors(signingInterceptor)
+				.errorHandler(new NoopResponseErrorHandler())
 				.build();
 	}
 

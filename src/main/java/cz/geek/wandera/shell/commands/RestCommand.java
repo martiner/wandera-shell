@@ -15,6 +15,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.shell.standard.ShellComponent;
@@ -86,6 +87,10 @@ public class RestCommand {
 
 		if (response.getBody() == null) {
 			return restResponse.showStatus();
+		}
+		if (response.getStatusCode().series() == HttpStatus.Series.CLIENT_ERROR
+				|| response.getStatusCode().series() == HttpStatus.Series.SERVER_ERROR) {
+			restResponse.showStatus();
 		}
 
 		boolean jsonCompatible = isCompatible(response.getHeaders());
