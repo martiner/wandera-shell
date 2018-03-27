@@ -43,14 +43,25 @@ public class RestCommand {
 	@ShellMethod("Issue GET request")
 	public String get(String uri, @ShellOption(defaultValue = NULL) String jq,
 			@ShellOption(defaultValue = NULL) File target,
-			@ShellOption(defaultValue = "false") boolean raw) throws IOException {
+			@ShellOption(defaultValue = "false") boolean raw,
+			@ShellOption(defaultValue = "false") boolean headers
+			) throws IOException {
 		ResponseEntity<byte[]> response = service.get(uri, byte[].class);
-		return processResponse(response, jq, target, raw);
+		return processResponse(response, jq, target, raw, headers).toString();
 	}
 
-	private String processResponse(ResponseEntity<byte[]> response, String jq, File target, boolean raw) throws IOException {
+	private RestResponse processResponse(ResponseEntity<byte[]> response, String jq, File target, boolean raw,
+			boolean headers) throws IOException {
+		RestResponse restResponse = new RestResponse(response.getStatusCodeValue());
+
+		if (headers) {
+			restResponse
+					.showStatus()
+					.headers(response.getHeaders());
+		}
+
 		if (response.getBody() == null) {
-			return "Status: " + response.getStatusCode();
+			return restResponse.showStatus();
 		}
 
 		boolean jsonCompatible = isCompatible(response.getHeaders());
@@ -60,22 +71,24 @@ public class RestCommand {
 				try {
 					JsonQuery q = JsonQuery.compile(jq);
 					List<JsonNode> result = q.apply(tree);
-					return (result.size() == 1 ? result.get(0) : result).toString();
+					return restResponse.body((result.size() == 1 ? result.get(0) : result).toString());
 				} catch (JsonQueryException e) {
 					throw new IllegalArgumentException(e.getMessage(), e);
 				}
 			}
-			return mapper.writeValueAsString(tree);
+			return restResponse.body(mapper.writeValueAsString(tree));
 		}
 
 		if (target != null) {
 			try (OutputStream output = Files.newOutputStream(target.toPath())) {
 				final int length = IOUtils.copy(new ByteArrayInputStream(response.getBody()), output);
-				return "Status: " + response.getStatusCode() + " " + target.getAbsolutePath() + ": " + length + " bytes";
+				return restResponse
+						.showStatus()
+						.body(target.getAbsolutePath() + ": " + length + " bytes");
 			}
 		}
 
-		return new String(response.getBody());
+		return restResponse.body(new String(response.getBody()));
 	}
 
 	private static boolean isCompatible(final HttpHeaders headers) {
