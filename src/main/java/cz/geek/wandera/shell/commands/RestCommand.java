@@ -8,9 +8,11 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import cz.geek.wandera.shell.rest.RestRequest;
 import cz.geek.wandera.shell.rest.RestService;
 import net.thisptr.jackson.jq.JsonQuery;
 import net.thisptr.jackson.jq.exception.JsonQueryException;
@@ -47,6 +50,27 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
 		ResponseEntity<byte[]> response = service.get(uri, byte[].class);
+		return processResponse(response, jq, target, raw, headers).toString();
+	}
+
+	@ShellMethod("Issue POST request")
+	public String post(String uri, @ShellOption(defaultValue = NULL) String jq,
+			@ShellOption(defaultValue = NULL) String data,
+			@ShellOption(defaultValue = NULL) File source,
+			@ShellOption(defaultValue = NULL) File target,
+			@ShellOption(defaultValue = "false") boolean raw,
+			@ShellOption(defaultValue = "false") boolean headers
+			) throws IOException {
+		RestRequest request;
+		if (data != null) {
+			request = new RestRequest(data);
+		} else if (source != null) {
+			String content = FileUtils.readFileToString(source, StandardCharsets.UTF_8);
+			request = new RestRequest(content);
+		} else {
+			throw new IllegalArgumentException("One of data or source has to be specified");
+		}
+		ResponseEntity<byte[]> response = service.post(uri, request, byte[].class);
 		return processResponse(response, jq, target, raw, headers).toString();
 	}
 
