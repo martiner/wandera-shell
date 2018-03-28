@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -78,11 +79,16 @@ public class RestCommand {
 	private RestResponse processResponse(ResponseEntity<byte[]> response, String jq, File target, boolean raw,
 			boolean headers) throws IOException {
 		RestResponse restResponse = new RestResponse(response.getStatusCodeValue());
+		URI location = response.getHeaders().getLocation();
 
 		if (headers) {
 			restResponse
 					.showStatus()
 					.headers(response.getHeaders());
+		} else if (location != null) {
+			HttpHeaders httpHeaders = new HttpHeaders();
+			httpHeaders.setLocation(location);
+			restResponse.headers(httpHeaders);
 		}
 
 		if (response.getBody() == null) {
