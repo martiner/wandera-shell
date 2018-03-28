@@ -35,8 +35,10 @@ public class RestResponse {
 			sb.append("Status: ").append(status).append("\n");
 		}
 		if (headers != null) {
-			//headers.entrySet().forEach((key, value) -> k);
-			sb.append("headers=").append(headers).append("\n");
+			headers.forEach((headerName, headerValues) ->
+					headerValues.forEach(
+							headerValue -> sb.append(headerName).append(": ").append(headerValue).append("\n"))
+			);
 		}
 		sb.append(body);
 		return sb.toString();
