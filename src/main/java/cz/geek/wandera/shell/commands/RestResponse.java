@@ -40,7 +40,9 @@ public class RestResponse {
 							headerValue -> sb.append(headerName).append(": ").append(headerValue).append("\n"))
 			);
 		}
-		sb.append(body);
+		if (body != null) {
+			sb.append(body);
+		}
 		return sb.toString();
 	}
 }
