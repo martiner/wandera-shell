@@ -1,4 +1,4 @@
-package cz.geek.wandera.shell.commands;
+package cz.geek.wandera.shell.rest;
 
 import org.springframework.http.HttpHeaders;
 
@@ -26,6 +26,22 @@ public class RestResponse {
 	public RestResponse body(String body) {
 		this.body = body;
 		return this;
+	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public HttpHeaders getHeaders() {
+		return headers;
+	}
+
+	public String getBody() {
+		return body;
+	}
+
+	public boolean isShowStatus() {
+		return showStatus;
 	}
 
 	@Override
