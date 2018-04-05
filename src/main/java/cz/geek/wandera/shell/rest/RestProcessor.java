@@ -60,6 +60,8 @@ public class RestProcessor {
 				return restResponse
 						.showStatus()
 						.body(target.getAbsolutePath() + ": " + length + " bytes");
+			} catch (IOException e) {
+				throw new IllegalArgumentException("Unable to write file: " + target.getAbsolutePath(), e);
 			}
 		}
 
