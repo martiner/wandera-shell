@@ -5,7 +5,9 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -50,7 +52,8 @@ public class RestServiceTest {
 	@Test
 	@DirtiesContext
 	public void shouldPerformSecondGetRequestWithRelativeUri() throws Exception {
-		server.expect(manyTimes(), requestTo("http://localhost/1")).andExpect(method(GET))
+		server.expect(manyTimes(), requestTo("http://localhost/1"))
+				.andExpect(method(GET))
 				.andRespond(withSuccess("foo", MediaType.TEXT_PLAIN));
 
 		ResponseEntity<String> response = service.get("http://localhost/1", String.class);
@@ -63,5 +66,17 @@ public class RestServiceTest {
 	@Test(expected = UnableToResolveUriException.class)
 	public void shouldFailFirstRequestWithRelativeUri() throws Exception {
 		service.get("/1", String.class);
+	}
+
+	@Test
+	public void shouldPostRequest() throws Exception {
+		server.expect(requestTo("http://localhost/2"))
+				.andExpect(method(POST))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().string("foo"))
+				.andRespond(withSuccess("bar", MediaType.TEXT_PLAIN));
+
+		ResponseEntity<String> response = service.post("http://localhost/2", new RestRequest("foo"), String.class);
+		assertThat(response.getBody(), is("bar"));
 	}
 }
