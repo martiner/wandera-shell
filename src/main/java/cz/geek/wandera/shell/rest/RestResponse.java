@@ -1,5 +1,7 @@
 package cz.geek.wandera.shell.rest;
 
+import java.util.StringJoiner;
+
 import org.springframework.http.HttpHeaders;
 
 public class RestResponse {
@@ -46,19 +48,19 @@ public class RestResponse {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("");
+		final StringJoiner result = new StringJoiner("\n");
 		if (showStatus) {
-			sb.append("Status: ").append(status).append("\n");
+			result.add("Status: " + status);
 		}
 		if (headers != null) {
 			headers.forEach((headerName, headerValues) ->
 					headerValues.forEach(
-							headerValue -> sb.append(headerName).append(": ").append(headerValue).append("\n"))
+							headerValue -> result.add(headerName + ": " + headerValue))
 			);
 		}
 		if (body != null) {
-			sb.append(body);
+			result.add(body);
 		}
-		return sb.toString();
+		return result.toString();
 	}
 }
