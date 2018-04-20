@@ -1,5 +1,7 @@
 package cz.geek.wandera.shell.rest;
 
+import static java.util.Objects.requireNonNull;
+
 import java.net.URI;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -28,6 +30,7 @@ public class RestService {
 	}
 
 	public <T> ResponseEntity<T> post(String uri, RestRequest request, Class<T> cls) {
+		requireNonNull(request, "request");
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(request.getContentType());
 		final HttpEntity<?> entity = new HttpEntity<>(request.getBody(), headers);

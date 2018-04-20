@@ -5,9 +5,7 @@ import static org.springframework.shell.standard.ShellOption.NULL;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -46,24 +44,9 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		RestRequest request = createRestRequest(data, source);
+		RestRequest request = RestRequest.create(data, source);
 		ResponseEntity<byte[]> response = service.post(uri, request, byte[].class);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
-	}
-
-	private static RestRequest createRestRequest(String data, File source) {
-		if (data != null) {
-			return new RestRequest(data);
-		} else if (source != null) {
-			try {
-				String content = FileUtils.readFileToString(source, StandardCharsets.UTF_8);
-				return new RestRequest(content);
-			} catch (IOException e) {
-				throw new IllegalArgumentException("Unable to read file: " + source.getAbsolutePath(), e);
-			}
-		} else {
-			throw new IllegalArgumentException("One of data or source has to be specified");
-		}
 	}
 
 }
