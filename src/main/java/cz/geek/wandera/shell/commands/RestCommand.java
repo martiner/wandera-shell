@@ -49,4 +49,18 @@ public class RestCommand {
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
 
+
+	@ShellMethod("Issue PUT request")
+	public String put(String uri, @ShellOption(defaultValue = NULL) String jq,
+			@ShellOption(defaultValue = NULL) String data,
+			@ShellOption(defaultValue = NULL) File source,
+			@ShellOption(defaultValue = NULL) File target,
+			@ShellOption(defaultValue = "false") boolean raw,
+			@ShellOption(defaultValue = "false") boolean headers
+			) throws IOException {
+		RestRequest request = RestRequest.create(data, source);
+		ResponseEntity<byte[]> response = service.put(uri, request, byte[].class);
+		return processor.processResponse(response, jq, target, raw, headers).toString();
+	}
+
 }

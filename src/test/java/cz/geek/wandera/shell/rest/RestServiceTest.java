@@ -6,6 +6,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -77,6 +78,18 @@ public class RestServiceTest {
 				.andRespond(withSuccess("bar", MediaType.TEXT_PLAIN));
 
 		ResponseEntity<String> response = service.post("http://localhost/2", new RestRequest("foo"), String.class);
+		assertThat(response.getBody(), is("bar"));
+	}
+
+	@Test
+	public void shouldPutRequest() throws Exception {
+		server.expect(requestTo("http://localhost/2"))
+				.andExpect(method(PUT))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().string("foo"))
+				.andRespond(withSuccess("bar", MediaType.TEXT_PLAIN));
+
+		ResponseEntity<String> response = service.put("http://localhost/2", new RestRequest("foo"), String.class);
 		assertThat(response.getBody(), is("bar"));
 	}
 }

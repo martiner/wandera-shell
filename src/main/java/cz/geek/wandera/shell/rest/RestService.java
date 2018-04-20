@@ -30,11 +30,20 @@ public class RestService {
 	}
 
 	public <T> ResponseEntity<T> post(String uri, RestRequest request, Class<T> cls) {
+		final HttpEntity<?> entity = createEntity(request);
+		return restTemplate.exchange(createUri(uri), HttpMethod.POST, entity, cls);
+	}
+
+	public <T> ResponseEntity<T> put(String uri, RestRequest request, Class<T> cls) {
+		final HttpEntity<?> entity = createEntity(request);
+		return restTemplate.exchange(createUri(uri), HttpMethod.PUT, entity, cls);
+	}
+
+	private HttpEntity<?> createEntity(RestRequest request) {
 		requireNonNull(request, "request");
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(request.getContentType());
-		final HttpEntity<?> entity = new HttpEntity<>(request.getBody(), headers);
-		return restTemplate.exchange(createUri(uri), HttpMethod.POST, entity, cls);
+		return new HttpEntity<>(request.getBody(), headers);
 	}
 
 	private URI createUri(String uriString) {
