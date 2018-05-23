@@ -6,6 +6,9 @@ public class WanderaKeys {
 
 	private String secretKey;
 
+	public WanderaKeys() {
+	}
+
 	public WanderaKeys(String apiKey, String secretKey) {
 		this.apiKey = apiKey;
 		this.secretKey = secretKey;
