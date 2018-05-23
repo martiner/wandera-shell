@@ -15,20 +15,22 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 
+import cz.geek.wandera.shell.keys.KeysHolder;
+
 @Component
 public class WanderaSigningInterceptor implements ClientHttpRequestInterceptor {
 
-	private final WanderaKeys wanderaKeys;
+	private final KeysHolder holder;
 	private final Clock clock;
 
-	WanderaSigningInterceptor(WanderaKeys wanderaKeys, Clock clock) {
+	WanderaSigningInterceptor(KeysHolder holder, Clock clock) {
 		this.clock = requireNonNull(clock, "clock");
-		this.wanderaKeys = requireNonNull(wanderaKeys, "keys");
+		this.holder = requireNonNull(holder, "holder");
 	}
 
 	@Autowired
-	public WanderaSigningInterceptor(WanderaKeys wanderaKeys) {
-		this(wanderaKeys, Clock.systemUTC());
+	public WanderaSigningInterceptor(KeysHolder holder) {
+		this(holder, Clock.systemUTC());
 	}
 
 	@Override
@@ -38,10 +40,10 @@ public class WanderaSigningInterceptor implements ClientHttpRequestInterceptor {
 		long timestamp = Instant.now(clock).toEpochMilli();
 
 		String value = "ts=" + timestamp + ";path=" + path + ";";
-		byte[] hmacSha1 = HmacUtils.hmacSha1(wanderaKeys.getSecretKey(), value);
+		byte[] hmacSha1 = HmacUtils.hmacSha1(holder.getKeys().getSecretKey(), value);
 		String sig = Base64.getEncoder().encodeToString(hmacSha1);
 
-		request.getHeaders().set("X-Key", wanderaKeys.getApiKey());
+		request.getHeaders().set("X-Key", holder.getKeys().getApiKey());
 		request.getHeaders().set("X-Sig", sig);
 		request.getHeaders().set("X-TS", Long.toString(timestamp));
 

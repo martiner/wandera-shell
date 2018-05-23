@@ -18,6 +18,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 
+import cz.geek.wandera.shell.keys.KeysHolder;
+import cz.geek.wandera.shell.keys.WanderaKeys;
+
 @RunWith(SpringRunner.class)
 @RestClientTest(RestService.class)
 public class WanderaSigningInterceptorTest {
@@ -44,7 +47,7 @@ public class WanderaSigningInterceptorTest {
 		@Bean WanderaSigningInterceptor interceptor() {
 			WanderaKeys keys = new WanderaKeys("api", "secret");
 			Clock clock = Clock.fixed(Instant.ofEpochSecond(3600), ZoneId.systemDefault());
-			return new WanderaSigningInterceptor(keys, clock);
+			return new WanderaSigningInterceptor(new KeysHolder(keys), clock);
 		}
 
 	}

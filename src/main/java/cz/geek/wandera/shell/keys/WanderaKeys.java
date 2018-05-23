@@ -1,16 +1,10 @@
-package cz.geek.wandera.shell.rest;
+package cz.geek.wandera.shell.keys;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class WanderaKeys {
 
 	private String apiKey;
 
 	private String secretKey;
-
-	public WanderaKeys() {
-	}
 
 	public WanderaKeys(String apiKey, String secretKey) {
 		this.apiKey = apiKey;
