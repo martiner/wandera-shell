@@ -3,6 +3,7 @@ package cz.geek.wandera.shell.rest;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Base64;
@@ -36,17 +37,26 @@ public class WanderaSigningInterceptor implements ClientHttpRequestInterceptor {
 	@Override
 	public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 			throws IOException {
-		String path = request.getURI().getPath();
-		long timestamp = Instant.now(clock).toEpochMilli();
 
-		String value = "ts=" + timestamp + ";path=" + path + ";";
-		byte[] hmacSha1 = HmacUtils.hmacSha1(holder.getKeys().getSecretKey(), value);
-		String sig = Base64.getEncoder().encodeToString(hmacSha1);
+		long timestamp = Instant.now(clock).toEpochMilli();
+		String sig = createSig(timestamp, request.getURI());
 
 		request.getHeaders().set("X-Key", holder.getKeys().getApiKey());
 		request.getHeaders().set("X-Sig", sig);
 		request.getHeaders().set("X-TS", Long.toString(timestamp));
 
 		return execution.execute(request, body);
+	}
+
+	private String createSig(long timestamp, URI uri) {
+		StringBuilder path = new StringBuilder(uri.getPath());
+		String query = uri.getQuery();
+		if (query != null) {
+			path.append("?").append(query);
+		}
+
+		String value = "ts=" + timestamp + ";path=" + path + ";";
+		byte[] hmacSha1 = HmacUtils.hmacSha1(holder.getKeys().getSecretKey(), value);
+		return Base64.getEncoder().encodeToString(hmacSha1);
 	}
 }
