@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 
@@ -39,7 +40,7 @@ public class WanderaSigningInterceptorTest {
 				.andExpect(header("X-Key", is("api")))
 				.andRespond(withSuccess());
 
-		service.get("http://localhost/test", String.class);
+		service.exchange("http://localhost/test", HttpMethod.GET);
 	}
 
 	static class Config {

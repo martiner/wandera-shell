@@ -25,23 +25,14 @@ public class RestService {
 				.build();
 	}
 
-	public <T> ResponseEntity<T> get(String uri, Class<T> cls) {
-		return restTemplate.getForEntity(createUri(uri), cls);
-	}
-
-	public <T> ResponseEntity<T> post(String uri, RestRequest request, Class<T> cls) {
+	public ResponseEntity<byte[]> exchange(String uri, HttpMethod method, RestRequest request) {
 		final HttpEntity<?> entity = createEntity(request);
-		return restTemplate.exchange(createUri(uri), HttpMethod.POST, entity, cls);
+		final URI requestUri = createUri(uri);
+		return restTemplate.exchange(requestUri, method, entity, byte[].class);
 	}
 
-	public <T> ResponseEntity<T> put(String uri, RestRequest request, Class<T> cls) {
-		final HttpEntity<?> entity = createEntity(request);
-		return restTemplate.exchange(createUri(uri), HttpMethod.PUT, entity, cls);
-	}
-
-	public <T> ResponseEntity<T> delete(String uri, Class<T> cls) {
-		HttpEntity<?> entity = createEntity(new RestRequest());
-		return restTemplate.exchange(createUri(uri), HttpMethod.DELETE, entity, cls);
+	public ResponseEntity<byte[]> exchange(String uri, HttpMethod method) {
+		return exchange(uri, method, new RestRequest());
 	}
 
 	void clearLastUri() {

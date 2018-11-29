@@ -6,6 +6,7 @@ import static org.springframework.shell.standard.ShellOption.NULL;
 import java.io.File;
 import java.io.IOException;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -32,7 +33,7 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		ResponseEntity<byte[]> response = service.get(uri, byte[].class);
+		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.GET);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
 
@@ -45,7 +46,7 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
 		RestRequest request = RestRequest.create(data, source);
-		ResponseEntity<byte[]> response = service.post(uri, request, byte[].class);
+		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.POST, request);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
 
@@ -58,7 +59,7 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
 		RestRequest request = RestRequest.create(data, source);
-		ResponseEntity<byte[]> response = service.put(uri, request, byte[].class);
+		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.PUT, request);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
 
@@ -67,7 +68,7 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		ResponseEntity<byte[]> response = service.delete(uri, byte[].class);
+		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.GET);
 		return processor.processResponse(response, null, null, raw, headers).toString();
 	}
 

@@ -60,17 +60,17 @@ public class RestServiceTest {
 				.andExpect(method(GET))
 				.andRespond(withSuccess("foo", MediaType.TEXT_PLAIN));
 
-		ResponseEntity<String> response = service.get("http://localhost/1", String.class);
-		assertThat(response.getBody(), is("foo"));
+		ResponseEntity<byte[]> response = service.exchange("http://localhost/1", GET);
+		assertThat(response.getBody(), is("foo".getBytes()));
 
-		ResponseEntity<String> second = service.get("/1", String.class);
-		assertThat(second.getBody(), is("foo"));
+		ResponseEntity<byte[]> second = service.exchange("/1", GET);
+		assertThat(second.getBody(), is("foo".getBytes()));
 	}
 
 	@Test(expected = UnableToResolveUriException.class)
 	public void shouldFailFirstRequestWithRelativeUri() throws Exception {
 		service.clearLastUri();
-		service.get("/1", String.class);
+		service.exchange("/1", GET);
 	}
 
 	@Test
@@ -81,8 +81,9 @@ public class RestServiceTest {
 				.andExpect(content().string("foo"))
 				.andRespond(withSuccess("bar", MediaType.TEXT_PLAIN));
 
-		ResponseEntity<String> response = service.post("http://localhost/2", new RestRequest("foo"), String.class);
-		assertThat(response.getBody(), is("bar"));
+		ResponseEntity<byte[]> response = service
+				.exchange("http://localhost/2", POST, new RestRequest("foo"));
+		assertThat(response.getBody(), is("bar".getBytes()));
 	}
 
 	@Test
@@ -93,8 +94,8 @@ public class RestServiceTest {
 				.andExpect(content().string("foo"))
 				.andRespond(withSuccess("bar", MediaType.TEXT_PLAIN));
 
-		ResponseEntity<String> response = service.put("http://localhost/2", new RestRequest("foo"), String.class);
-		assertThat(response.getBody(), is("bar"));
+		ResponseEntity<byte[]> response = service.exchange("http://localhost/2", PUT, new RestRequest("foo"));
+		assertThat(response.getBody(), is("bar".getBytes()));
 	}
 
 	@Test
@@ -104,7 +105,7 @@ public class RestServiceTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withNoContent());
 
-		ResponseEntity<String> response = service.delete("http://localhost/2", String.class);
+		ResponseEntity<byte[]> response = service.exchange("http://localhost/2", DELETE);
 		assertThat(response.getStatusCode(), is(HttpStatus.NO_CONTENT));
 	}
 }
