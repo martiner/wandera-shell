@@ -23,6 +23,10 @@ public class RestRequest {
 		this(MediaType.APPLICATION_JSON, data);
 	}
 
+	public RestRequest() {
+		this(null);
+	}
+
 	public Object getBody() {
 		return body;
 	}
@@ -43,6 +47,6 @@ public class RestRequest {
 				throw new IllegalArgumentException("Unable to read file: " + source.getAbsolutePath(), e);
 			}
 		}
-		return new RestRequest(null);
+		return new RestRequest();
 	}
 }

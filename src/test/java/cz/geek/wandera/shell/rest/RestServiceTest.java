@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
@@ -11,6 +12,7 @@ import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withNoContent;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import org.junit.Before;
@@ -19,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
@@ -66,6 +69,7 @@ public class RestServiceTest {
 
 	@Test(expected = UnableToResolveUriException.class)
 	public void shouldFailFirstRequestWithRelativeUri() throws Exception {
+		service.clearLastUri();
 		service.get("/1", String.class);
 	}
 
@@ -91,5 +95,16 @@ public class RestServiceTest {
 
 		ResponseEntity<String> response = service.put("http://localhost/2", new RestRequest("foo"), String.class);
 		assertThat(response.getBody(), is("bar"));
+	}
+
+	@Test
+	public void shouldDeleteRequest() throws Exception {
+		server.expect(requestTo("http://localhost/2"))
+				.andExpect(method(DELETE))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(withNoContent());
+
+		ResponseEntity<String> response = service.delete("http://localhost/2", String.class);
+		assertThat(response.getStatusCode(), is(HttpStatus.NO_CONTENT));
 	}
 }

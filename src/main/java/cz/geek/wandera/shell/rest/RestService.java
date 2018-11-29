@@ -39,6 +39,15 @@ public class RestService {
 		return restTemplate.exchange(createUri(uri), HttpMethod.PUT, entity, cls);
 	}
 
+	public <T> ResponseEntity<T> delete(String uri, Class<T> cls) {
+		HttpEntity<?> entity = createEntity(new RestRequest());
+		return restTemplate.exchange(createUri(uri), HttpMethod.DELETE, entity, cls);
+	}
+
+	void clearLastUri() {
+		lastUri = null;
+	}
+
 	private HttpEntity<?> createEntity(RestRequest request) {
 		requireNonNull(request, "request");
 		final HttpHeaders headers = new HttpHeaders();

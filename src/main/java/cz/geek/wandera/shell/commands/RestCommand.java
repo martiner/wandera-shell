@@ -49,7 +49,6 @@ public class RestCommand {
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
 
-
 	@ShellMethod("Issue PUT request")
 	public String put(String uri, @ShellOption(defaultValue = NULL) String jq,
 			@ShellOption(defaultValue = NULL) String data,
@@ -61,6 +60,15 @@ public class RestCommand {
 		RestRequest request = RestRequest.create(data, source);
 		ResponseEntity<byte[]> response = service.put(uri, request, byte[].class);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
+	}
+
+	@ShellMethod("Issue DELETE request")
+	public String delete(String uri,
+			@ShellOption(defaultValue = "false") boolean raw,
+			@ShellOption(defaultValue = "false") boolean headers
+			) throws IOException {
+		ResponseEntity<byte[]> response = service.delete(uri, byte[].class);
+		return processor.processResponse(response, null, null, raw, headers).toString();
 	}
 
 }
