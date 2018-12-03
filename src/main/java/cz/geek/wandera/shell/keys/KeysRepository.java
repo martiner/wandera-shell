@@ -21,6 +21,8 @@ public class KeysRepository  {
 	private static final String KEYS_PREFIX = "keys";
 	private static final String API = "api";
 	private static final String SECRET = "secret";
+	private static final String DEFAULT_KEY_NAME = "key.default";
+
 	private final Path keysFile;
 
 	public KeysRepository(WanderaShellDirectory directory) {
@@ -31,11 +33,39 @@ public class KeysRepository  {
 		Properties properties = loadProperties();
 		properties.put(apiName(name), keys.getApiKey());
 		properties.put(secretName(name), keys.getSecretKey());
+		storeDefault(properties, name);
 		saveProperties(properties);
 	}
 
-	public WanderaKeys load(String name) {
+	private void storeDefault(Properties properties, String name) {
+		properties.put(DEFAULT_KEY_NAME, name);
+	}
+
+	public WanderaKeys loadAndSaveDefault(String name) {
 		Properties properties = loadProperties();
+		WanderaKeys keys = getKeys(properties, name);
+		storeDefault(properties, name);
+		try {
+			saveProperties(properties);
+		} catch (IllegalStateException ignored) {
+		}
+		return keys;
+	}
+
+	public WanderaKeys loadDefault() {
+		Properties properties = loadProperties();
+		String name = properties.getProperty(DEFAULT_KEY_NAME);
+		if (name == null) {
+			return null;
+		}
+		try {
+			return getKeys(properties, name);
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
+
+	private WanderaKeys getKeys(Properties properties, String name) {
 		String api = properties.getProperty(apiName(name));
 		String secret = properties.getProperty(secretName(name));
 

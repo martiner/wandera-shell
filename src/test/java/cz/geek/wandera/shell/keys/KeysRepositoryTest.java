@@ -32,13 +32,24 @@ public class KeysRepositoryTest {
 	}
 
 	@Test
+	public void shouldReturnNullOnNoDefault() throws Exception {
+		WanderaKeys keys = repository.loadDefault();
+		assertThat(keys).isNull();
+	}
+
+	@Test
 	public void shouldStoreLoadAndListKeys() throws Exception {
 		repository.store("foo", new WanderaKeys("API", "SECRET"));
 
-		WanderaKeys keys = repository.load("foo");
+		WanderaKeys keys = repository.loadAndSaveDefault("foo");
 		assertThat(keys).isNotNull();
 		assertThat(keys.getApiKey()).isEqualTo("API");
 		assertThat(keys.getSecretKey()).isEqualTo("SECRET");
+
+		WanderaKeys defaultKeys = repository.loadDefault();
+		assertThat(defaultKeys).isNotNull();
+		assertThat(defaultKeys.getApiKey()).isEqualTo("API");
+		assertThat(defaultKeys.getSecretKey()).isEqualTo("SECRET");
 
 		Map<String, WanderaKeys> keysMap = repository.list();
 		assertThat(keysMap).isNotEmpty();

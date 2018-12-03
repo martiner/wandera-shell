@@ -1,5 +1,7 @@
 package cz.geek.wandera.shell.commands;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.table.BorderStyle;
@@ -21,6 +23,14 @@ public class KeyCommand {
 		this.repository = repository;
 	}
 
+	@PostConstruct
+	public void loadDefault() {
+		WanderaKeys keys = repository.loadDefault();
+		if (keys != null) {
+			holder.hold(keys);
+		}
+	}
+
 	@ShellMethod(key = "key set", value = "Set keys")
 	public void key(String api, String secret) {
 		holder.hold(new WanderaKeys(api, secret));
@@ -35,7 +45,7 @@ public class KeyCommand {
 
 	@ShellMethod(key = "key use", value = "Use saved keys")
 	public void keyUse(String name) {
-		WanderaKeys keys = repository.load(name);
+		WanderaKeys keys = repository.loadAndSaveDefault(name);
 		holder.hold(keys);
 	}
 
