@@ -8,10 +8,13 @@ import java.io.IOException;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
+import cz.geek.wandera.shell.keys.KeysHolder;
 import cz.geek.wandera.shell.rest.RestProcessor;
 import cz.geek.wandera.shell.rest.RestRequest;
 import cz.geek.wandera.shell.rest.RestService;
@@ -21,10 +24,19 @@ public class RestCommand {
 
 	private final RestService service;
 	private final RestProcessor processor;
+	private final KeysHolder keysHolder;
 
-	public RestCommand(RestService service, RestProcessor processor) {
-		this.service = requireNonNull(service);
-		this.processor = requireNonNull(processor);
+	public RestCommand(RestService service, RestProcessor processor, KeysHolder keysHolder) {
+		this.service = requireNonNull(service, "service");
+		this.processor = requireNonNull(processor, "processor");
+		this.keysHolder = requireNonNull(keysHolder, "keysHolder");
+	}
+
+	@ShellMethodAvailability
+	public Availability availability() {
+		return keysHolder.hasKeys()
+				? Availability.available()
+				: Availability.unavailable("you have to use 'key set' or 'key save' command first");
 	}
 
 	@ShellMethod("Issue GET request")

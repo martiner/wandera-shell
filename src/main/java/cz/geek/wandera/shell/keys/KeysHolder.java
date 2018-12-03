@@ -28,4 +28,8 @@ public class KeysHolder {
 		}
 		return keys;
 	}
+
+	public boolean hasKeys() {
+		return keys != null;
+	}
 }
