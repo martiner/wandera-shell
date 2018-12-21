@@ -80,7 +80,7 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.GET);
+		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.DELETE);
 		return processor.processResponse(response, null, null, raw, headers).toString();
 	}
 
