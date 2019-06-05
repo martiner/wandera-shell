@@ -7,20 +7,21 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.FileUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
 public class RestRequest {
 
+	private final HttpMethod method;
+	private final String uri;
 	private final MediaType contentType;
 	private final Object body;
 
-	private RestRequest(MediaType contentType, Object body) {
+	private RestRequest(HttpMethod method, String uri, MediaType contentType, Object body) {
+		this.method = requireNonNull(method, "method");
+		this.uri = requireNonNull(uri, "uri");
 		this.contentType = requireNonNull(contentType, "contentType");
 		this.body = body;
-	}
-
-	private RestRequest(String data) {
-		this(MediaType.APPLICATION_JSON, data);
 	}
 
 	public Object getBody() {
@@ -31,13 +32,28 @@ public class RestRequest {
 		return contentType;
 	}
 
-	public static Builder create() {
-		return new Builder();
+	public HttpMethod getMethod() {
+		return method;
+	}
+
+	public String getUri() {
+		return uri;
+	}
+
+	public static Builder create(HttpMethod method, String uri) {
+		return new Builder(method, uri);
 	}
 
 	public static class Builder {
 
+		private final HttpMethod method;
+		private final String uri;
 		private String data;
+
+		public Builder(HttpMethod method, String uri) {
+			this.method = requireNonNull(method, "method");
+			this.uri = requireNonNull(uri, "uri");
+		}
 
 		public Builder data(String data) {
 			this.data = data;
@@ -56,7 +72,7 @@ public class RestRequest {
 		}
 
 		public RestRequest build() {
-			return new RestRequest(data);
+			return new RestRequest(method, uri, MediaType.APPLICATION_JSON, data);
 		}
 
 	}

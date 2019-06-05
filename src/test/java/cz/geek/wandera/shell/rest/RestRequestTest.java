@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.fail;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import java.io.File;
@@ -21,14 +22,14 @@ public class RestRequestTest {
 
 	@Test
 	public void shouldCreateRestRequestWithJsonBody() throws Exception {
-		RestRequest request = RestRequest.create().data("json").build();
+		RestRequest request = RestRequest.create(GET, "uri").data("json").build();
 		assertThat(request.getBody(), is("json"));
 		assertThat(request.getContentType(), is(APPLICATION_JSON));
 	}
 
 	@Test
 	public void shouldCreateRestRequestWithNullJsonBody() throws Exception {
-		RestRequest request = RestRequest.create().build();
+		RestRequest request = RestRequest.create(GET, "uri").build();
 		assertThat(request.getBody(), is(nullValue()));
 		assertThat(request.getContentType(), is(APPLICATION_JSON));
 	}
@@ -38,7 +39,7 @@ public class RestRequestTest {
 		File file = folder.newFile();
 		FileUtils.write(file, "foo", StandardCharsets.UTF_8);
 
-		RestRequest request = RestRequest.create().data(file).build();
+		RestRequest request = RestRequest.create(GET, "uri").data(file).build();
 		assertThat(request.getBody(), is("foo"));
 		assertThat(request.getContentType(), is(APPLICATION_JSON));
 	}
@@ -50,6 +51,6 @@ public class RestRequestTest {
 			fail("Unable to create fixture: file " + file + " can't be deleted");
 		}
 
-		RestRequest.create().data(file).build();
+		RestRequest.create(GET, "uri").data(file).build();
 	}
 }

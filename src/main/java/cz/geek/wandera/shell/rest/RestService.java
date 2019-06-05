@@ -7,7 +7,6 @@ import java.net.URI;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -25,10 +24,10 @@ public class RestService {
 				.build();
 	}
 
-	public ResponseEntity<byte[]> exchange(String uri, HttpMethod method, RestRequest request) {
+	public ResponseEntity<byte[]> exchange(RestRequest request) {
 		final HttpEntity<?> entity = createEntity(request);
-		final URI requestUri = createUri(uri);
-		return restTemplate.exchange(requestUri, method, entity, byte[].class);
+		final URI requestUri = createUri(request.getUri());
+		return restTemplate.exchange(requestUri, request.getMethod(), entity, byte[].class);
 	}
 
 	void clearLastUri() {

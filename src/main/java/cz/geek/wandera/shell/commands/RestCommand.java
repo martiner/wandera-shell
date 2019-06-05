@@ -1,12 +1,15 @@
 package cz.geek.wandera.shell.commands;
 
 import static java.util.Objects.requireNonNull;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.shell.standard.ShellOption.NULL;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
@@ -45,8 +48,8 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		RestRequest request = RestRequest.create().build();
-		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.GET, request);
+		RestRequest request = RestRequest.create(GET, uri).build();
+		ResponseEntity<byte[]> response = service.exchange(request);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
 
@@ -58,8 +61,8 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		RestRequest request = RestRequest.create().data(data).data(source).build();
-		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.POST, request);
+		RestRequest request = RestRequest.create(POST, uri).data(data).data(source).build();
+		ResponseEntity<byte[]> response = service.exchange(request);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
 
@@ -71,8 +74,8 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		RestRequest request = RestRequest.create().data(data).data(source).build();
-		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.PUT, request);
+		RestRequest request = RestRequest.create(PUT, uri).data(data).data(source).build();
+		ResponseEntity<byte[]> response = service.exchange(request);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
 
@@ -81,8 +84,8 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		RestRequest request = RestRequest.create().build();
-		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.DELETE, request);
+		RestRequest request = RestRequest.create(DELETE, uri).build();
+		ResponseEntity<byte[]> response = service.exchange(request);
 		return processor.processResponse(response, null, null, raw, headers).toString();
 	}
 

@@ -2,6 +2,7 @@ package cz.geek.wandera.shell.rest;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -15,7 +16,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 
@@ -40,7 +40,7 @@ public class WanderaSigningInterceptorTest {
 				.andExpect(header("X-Key", is("api")))
 				.andRespond(withSuccess());
 
-		service.exchange("http://localhost/test", HttpMethod.GET, RestRequest.create().build());
+		service.exchange(RestRequest.create(GET, "http://localhost/test").build());
 	}
 
 	static class Config {
