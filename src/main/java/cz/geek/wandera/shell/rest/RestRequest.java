@@ -14,17 +14,13 @@ public class RestRequest {
 	private final MediaType contentType;
 	private final Object body;
 
-	public RestRequest(MediaType contentType, Object body) {
+	private RestRequest(MediaType contentType, Object body) {
 		this.contentType = requireNonNull(contentType, "contentType");
 		this.body = body;
 	}
 
-	public RestRequest(String data) {
+	private RestRequest(String data) {
 		this(MediaType.APPLICATION_JSON, data);
-	}
-
-	public RestRequest() {
-		this(null);
 	}
 
 	public Object getBody() {
@@ -35,18 +31,34 @@ public class RestRequest {
 		return contentType;
 	}
 
-	public static RestRequest create(String data, File source) {
-		if (data != null) {
+	public static Builder create() {
+		return new Builder();
+	}
+
+	public static class Builder {
+
+		private String data;
+
+		public Builder data(String data) {
+			this.data = data;
+			return this;
+		}
+
+		public Builder data(File source) {
+			if (source != null) {
+				try {
+					data = FileUtils.readFileToString(source, StandardCharsets.UTF_8);
+				} catch (IOException e) {
+					throw new IllegalArgumentException("Unable to read file: " + source.getAbsolutePath(), e);
+				}
+			}
+			return this;
+		}
+
+		public RestRequest build() {
 			return new RestRequest(data);
 		}
-		if (source != null) {
-			try {
-				String content = FileUtils.readFileToString(source, StandardCharsets.UTF_8);
-				return new RestRequest(content);
-			} catch (IOException e) {
-				throw new IllegalArgumentException("Unable to read file: " + source.getAbsolutePath(), e);
-			}
-		}
-		return new RestRequest();
+
 	}
+
 }

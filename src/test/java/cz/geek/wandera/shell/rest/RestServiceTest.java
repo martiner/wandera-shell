@@ -60,17 +60,17 @@ public class RestServiceTest {
 				.andExpect(method(GET))
 				.andRespond(withSuccess("foo", MediaType.TEXT_PLAIN));
 
-		ResponseEntity<byte[]> response = service.exchange("http://localhost/1", GET);
+		ResponseEntity<byte[]> response = service.exchange("http://localhost/1", GET, RestRequest.create().build());
 		assertThat(response.getBody(), is("foo".getBytes()));
 
-		ResponseEntity<byte[]> second = service.exchange("/1", GET);
+		ResponseEntity<byte[]> second = service.exchange("/1", GET, RestRequest.create().build());
 		assertThat(second.getBody(), is("foo".getBytes()));
 	}
 
 	@Test(expected = UnableToResolveUriException.class)
 	public void shouldFailFirstRequestWithRelativeUri() throws Exception {
 		service.clearLastUri();
-		service.exchange("/1", GET);
+		service.exchange("/1", GET, RestRequest.create().build());
 	}
 
 	@Test
@@ -81,8 +81,8 @@ public class RestServiceTest {
 				.andExpect(content().string("foo"))
 				.andRespond(withSuccess("bar", MediaType.TEXT_PLAIN));
 
-		ResponseEntity<byte[]> response = service
-				.exchange("http://localhost/2", POST, new RestRequest("foo"));
+		RestRequest request = RestRequest.create().data("foo").build();
+		ResponseEntity<byte[]> response = service.exchange("http://localhost/2", POST, request);
 		assertThat(response.getBody(), is("bar".getBytes()));
 	}
 
@@ -94,7 +94,8 @@ public class RestServiceTest {
 				.andExpect(content().string("foo"))
 				.andRespond(withSuccess("bar", MediaType.TEXT_PLAIN));
 
-		ResponseEntity<byte[]> response = service.exchange("http://localhost/2", PUT, new RestRequest("foo"));
+		RestRequest request = RestRequest.create().data("foo").build();
+		ResponseEntity<byte[]> response = service.exchange("http://localhost/2", PUT, request);
 		assertThat(response.getBody(), is("bar".getBytes()));
 	}
 
@@ -105,7 +106,7 @@ public class RestServiceTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withNoContent());
 
-		ResponseEntity<byte[]> response = service.exchange("http://localhost/2", DELETE);
+		ResponseEntity<byte[]> response = service.exchange("http://localhost/2", DELETE, RestRequest.create().build());
 		assertThat(response.getStatusCode(), is(HttpStatus.NO_CONTENT));
 	}
 }

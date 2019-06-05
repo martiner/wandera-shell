@@ -21,14 +21,14 @@ public class RestRequestTest {
 
 	@Test
 	public void shouldCreateRestRequestWithJsonBody() throws Exception {
-		RestRequest request = RestRequest.create("json", null);
+		RestRequest request = RestRequest.create().data("json").build();
 		assertThat(request.getBody(), is("json"));
 		assertThat(request.getContentType(), is(APPLICATION_JSON));
 	}
 
 	@Test
 	public void shouldCreateRestRequestWithNullJsonBody() throws Exception {
-		RestRequest request = RestRequest.create(null, null);
+		RestRequest request = RestRequest.create().build();
 		assertThat(request.getBody(), is(nullValue()));
 		assertThat(request.getContentType(), is(APPLICATION_JSON));
 	}
@@ -38,7 +38,7 @@ public class RestRequestTest {
 		File file = folder.newFile();
 		FileUtils.write(file, "foo", StandardCharsets.UTF_8);
 
-		RestRequest request = RestRequest.create(null, file);
+		RestRequest request = RestRequest.create().data(file).build();
 		assertThat(request.getBody(), is("foo"));
 		assertThat(request.getContentType(), is(APPLICATION_JSON));
 	}
@@ -50,6 +50,6 @@ public class RestRequestTest {
 			fail("Unable to create fixture: file " + file + " can't be deleted");
 		}
 
-		RestRequest.create(null, file);
+		RestRequest.create().data(file).build();
 	}
 }

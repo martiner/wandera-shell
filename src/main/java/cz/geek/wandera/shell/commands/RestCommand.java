@@ -45,7 +45,8 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.GET);
+		RestRequest request = RestRequest.create().build();
+		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.GET, request);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
 
@@ -57,7 +58,7 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		RestRequest request = RestRequest.create(data, source);
+		RestRequest request = RestRequest.create().data(data).data(source).build();
 		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.POST, request);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
@@ -70,7 +71,7 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		RestRequest request = RestRequest.create(data, source);
+		RestRequest request = RestRequest.create().data(data).data(source).build();
 		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.PUT, request);
 		return processor.processResponse(response, jq, target, raw, headers).toString();
 	}
@@ -80,7 +81,8 @@ public class RestCommand {
 			@ShellOption(defaultValue = "false") boolean raw,
 			@ShellOption(defaultValue = "false") boolean headers
 			) throws IOException {
-		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.DELETE);
+		RestRequest request = RestRequest.create().build();
+		ResponseEntity<byte[]> response = service.exchange(uri, HttpMethod.DELETE, request);
 		return processor.processResponse(response, null, null, raw, headers).toString();
 	}
 

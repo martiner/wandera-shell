@@ -40,7 +40,7 @@ public class WanderaSigningInterceptorTest {
 				.andExpect(header("X-Key", is("api")))
 				.andRespond(withSuccess());
 
-		service.exchange("http://localhost/test", HttpMethod.GET);
+		service.exchange("http://localhost/test", HttpMethod.GET, RestRequest.create().build());
 	}
 
 	static class Config {

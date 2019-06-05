@@ -31,10 +31,6 @@ public class RestService {
 		return restTemplate.exchange(requestUri, method, entity, byte[].class);
 	}
 
-	public ResponseEntity<byte[]> exchange(String uri, HttpMethod method) {
-		return exchange(uri, method, new RestRequest());
-	}
-
 	void clearLastUri() {
 		lastUri = null;
 	}
