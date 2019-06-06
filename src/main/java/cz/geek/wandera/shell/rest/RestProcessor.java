@@ -55,32 +55,41 @@ public class RestProcessor {
 		}
 
 		if (target != null) {
-			try (OutputStream output = Files.newOutputStream(target.toPath())) {
-				final int length = IOUtils.copy(new ByteArrayInputStream(response.getBody()), output);
-				return restResponse
-						.showStatus()
-						.body(target.getAbsolutePath() + ": " + length + " bytes");
-			} catch (IOException e) {
-				throw new IllegalArgumentException("Unable to write file: " + target.getAbsolutePath(), e);
-			}
+			String fileInfo = writeToFile(response, target);
+			return restResponse.showStatus().body(fileInfo);
 		}
 
 		boolean jsonCompatible = isCompatible(response.getHeaders());
 		if ((jq != null || !raw) && jsonCompatible) {
-			final JsonNode tree = mapper.readTree(response.getBody());
-			if (jq != null) {
-				try {
-					JsonQuery q = JsonQuery.compile(jq);
-					List<JsonNode> result = q.apply(tree);
-					return restResponse.body((result.size() == 1 ? result.get(0) : result).toString());
-				} catch (JsonQueryException e) {
-					throw new IllegalArgumentException(e.getMessage(), e);
-				}
-			}
-			return restResponse.body(mapper.writeValueAsString(tree));
+			String body = jsonResponse(response, jq);
+			return restResponse.body(body);
 		}
 
 		return restResponse.body(new String(response.getBody()));
+	}
+
+	private String writeToFile(ResponseEntity<byte[]> response, File target) {
+		try (OutputStream output = Files.newOutputStream(target.toPath())) {
+			final int length = IOUtils.copy(new ByteArrayInputStream(response.getBody()), output);
+			return target.getAbsolutePath() + ": " + length + " bytes";
+		} catch (IOException e) {
+			throw new IllegalArgumentException("Unable to write file: " + target.getAbsolutePath(), e);
+		}
+	}
+
+	private String jsonResponse(ResponseEntity<byte[]> response, String jq) throws IOException {
+		final JsonNode tree = mapper.readTree(response.getBody());
+		return jq != null ? jqResponse(tree, jq) : mapper.writeValueAsString(tree);
+	}
+
+	private static String jqResponse(JsonNode tree, String jq) {
+		try {
+			JsonQuery q = JsonQuery.compile(jq);
+			List<JsonNode> result = q.apply(tree);
+			return (result.size() == 1 ? result.get(0) : result).toString();
+		} catch (JsonQueryException e) {
+			throw new IllegalArgumentException(e.getMessage(), e);
+		}
 	}
 
 	private static boolean isCompatible(final HttpHeaders headers) {
