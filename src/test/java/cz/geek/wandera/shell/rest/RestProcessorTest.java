@@ -28,6 +28,7 @@ public class RestProcessorTest {
 	private RestProcessor processor;
 	private String jsonPretty;
 	private String jsonRaw;
+	private HttpHeaders jsonHeaders;
 	private ResponseEntity<byte[]> jsonResponse;
 	private ResponseEntity<byte[]> simpleResponse;
 
@@ -37,7 +38,7 @@ public class RestProcessorTest {
 		jsonPretty = IOUtils.toString(new ClassPathResource("/pretty.json").getInputStream(), StandardCharsets.UTF_8);
 		jsonRaw = IOUtils.toString(new ClassPathResource("/test.json").getInputStream(), StandardCharsets.UTF_8);
 		byte[] jsonBytes = jsonRaw.getBytes();
-		HttpHeaders jsonHeaders = new HttpHeaders();
+		jsonHeaders = new HttpHeaders();
 		jsonHeaders.set("Content-type", "application/json");
 		jsonResponse = new ResponseEntity<>(jsonBytes, jsonHeaders, HttpStatus.OK);
 		simpleResponse = new ResponseEntity<>(BODY_BYTES, HttpStatus.OK);
@@ -110,6 +111,14 @@ public class RestProcessorTest {
 	public void shouldShowRawJson() throws Exception {
 		RestResponse response = processor.processResponse(jsonResponse, null, null, true, false);
 		assertThat(response.getBody()).isEqualTo(jsonRaw);
+	}
+
+	@Test
+	public void shouldShowInvalidJson() throws Exception {
+		String invalidJson = "foo";
+		ResponseEntity<byte[]> invalid = new ResponseEntity<>(invalidJson.getBytes(), jsonHeaders, HttpStatus.OK);
+		RestResponse response = processor.processResponse(invalid, null, null, false, false);
+		assertThat(response.getBody()).isEqualTo(invalidJson);
 	}
 
 	@Test

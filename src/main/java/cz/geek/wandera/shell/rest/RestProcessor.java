@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -61,8 +62,12 @@ public class RestProcessor {
 
 		boolean jsonCompatible = isCompatible(response.getHeaders());
 		if ((jq != null || !raw) && jsonCompatible) {
-			String body = jsonResponse(response, jq);
-			return restResponse.body(body);
+			try {
+				String body = jsonResponse(response, jq);
+				return restResponse.body(body);
+			} catch (JsonParseException ignored) {
+				// not valid json, return raw response
+			}
 		}
 
 		return restResponse.body(new String(response.getBody()));
