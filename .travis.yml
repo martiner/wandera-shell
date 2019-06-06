@@ -1,9 +1,9 @@
+dist: trusty
 language: java
 install: true
 script: mvn verify
 jdk:
   - oraclejdk8
-sudo: false
 branches:
   only:
     - master
