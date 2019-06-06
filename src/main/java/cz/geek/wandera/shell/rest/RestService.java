@@ -15,6 +15,10 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class RestService {
 
+	static {
+		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+	}
+
 	private final RestTemplate restTemplate;
 	private URI lastUri;
 
