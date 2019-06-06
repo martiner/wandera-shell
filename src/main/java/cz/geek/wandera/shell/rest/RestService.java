@@ -3,6 +3,7 @@ package cz.geek.wandera.shell.rest;
 import static java.util.Objects.requireNonNull;
 
 import java.net.URI;
+import java.util.stream.Stream;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -38,6 +39,8 @@ public class RestService {
 		requireNonNull(request, "request");
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(request.getContentType());
+		Stream.of(request.getHeaders())
+				.forEach(header -> headers.set(header.getName(), header.getValue()));
 		return new HttpEntity<>(request.getBody(), headers);
 	}
 

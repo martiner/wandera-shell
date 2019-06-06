@@ -10,6 +10,7 @@ import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withNoContent;
@@ -108,5 +109,21 @@ public class RestServiceTest {
 
 		ResponseEntity<byte[]> response = service.exchange(RestRequest.create(DELETE, "http://localhost/2").build());
 		assertThat(response.getStatusCode(), is(HttpStatus.NO_CONTENT));
+	}
+
+	@Test
+	public void shouldGetWithHeader() throws Exception {
+		server.expect(requestTo("http://localhost/2"))
+				.andExpect(method(GET))
+				.andExpect(header("via", "foo"))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andRespond(withSuccess());
+
+		RestRequest request = RestRequest.create(GET, "http://localhost/2")
+				.headers(new HttpHeader("Via", "foo"))
+				.build();
+		ResponseEntity<byte[]> response = service.exchange(request);
+		assertThat(response.getStatusCode(), is(HttpStatus.OK));
+		server.verify();
 	}
 }
