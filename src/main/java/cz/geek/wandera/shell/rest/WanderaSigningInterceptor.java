@@ -17,6 +17,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 
+import cz.geek.wandera.shell.keys.ExtraSigBuilder;
 import cz.geek.wandera.shell.keys.KeysHolder;
 import cz.geek.wandera.shell.keys.SigBuilder;
 import cz.geek.wandera.shell.keys.WanderaKeys;
@@ -44,13 +45,16 @@ public class WanderaSigningInterceptor implements ClientHttpRequestInterceptor {
 		WanderaKeys keys = holder.getKeys();
 		Instant timestamp = Instant.now(clock);
 
-		SigBuilder builder = new SigBuilder(timestamp);
+		SigBuilder builder = keys.getExtraHeader().isPresent()
+				? new ExtraSigBuilder(timestamp, keys.getExtraHeader().get())
+				: new SigBuilder(timestamp);
 		String sig = builder.createSig(keys.getSecretKey(), request.getURI());
 
 		HttpHeaders headers = request.getHeaders();
 		headers.set(KEY_HEADER, keys.getApiKey());
 		headers.set(SIG_HEADER, sig);
 		headers.set(TIMESTAMP_HEADER, builder.getTimestamp());
+		keys.getExtraHeader().ifPresent(header -> headers.set(header.getName(), header.getValue()));
 
 		return execution.execute(request, body);
 	}

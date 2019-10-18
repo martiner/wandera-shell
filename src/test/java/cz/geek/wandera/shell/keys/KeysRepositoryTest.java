@@ -8,9 +8,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 
 import cz.geek.wandera.shell.WanderaShellDirectory;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 
+@RunWith(JUnitParamsRunner.class)
 public class KeysRepositoryTest {
 
 	@Rule
@@ -38,25 +42,34 @@ public class KeysRepositoryTest {
 	}
 
 	@Test
-	public void shouldStoreLoadAndListKeys() throws Exception {
-		repository.store("foo", new WanderaKeys("API", "SECRET"));
+	@Parameters(method = "keys")
+	public void shouldStoreLoadAndListKeys(WanderaKeys original) throws Exception {
+		repository.store("foo", original);
 
 		WanderaKeys keys = repository.loadAndSaveDefault("foo");
-		assertThat(keys).isNotNull();
-		assertThat(keys.getApiKey()).isEqualTo("API");
-		assertThat(keys.getSecretKey()).isEqualTo("SECRET");
+		assertKeysEqual(original, keys);
 
 		WanderaKeys defaultKeys = repository.loadDefault();
-		assertThat(defaultKeys).isNotNull();
-		assertThat(defaultKeys.getApiKey()).isEqualTo("API");
-		assertThat(defaultKeys.getSecretKey()).isEqualTo("SECRET");
+		assertKeysEqual(original, defaultKeys);
 
 		Map<String, WanderaKeys> keysMap = repository.list();
 		assertThat(keysMap).isNotEmpty();
 		assertThat(keysMap).containsKeys("foo");
 
 		WanderaKeys fooKey = keysMap.get("foo");
-		assertThat(fooKey.getApiKey()).isEqualTo("API");
-		assertThat(fooKey.getSecretKey()).isEqualTo("SECRET");
+		assertKeysEqual(original, fooKey);
+	}
+
+	public Object[][] keys() {
+		return new Object[][] {
+				new Object[] { new WanderaKeys("API", "SECRET") },
+				new Object[] { new WanderaKeys("API", "SECRET", "SERVICE", null) },
+				new Object[] { new WanderaKeys("API", "SECRET", null, "NODE") },
+		};
+	}
+	private void assertKeysEqual(WanderaKeys original, WanderaKeys keys) {
+		assertThat(keys).isNotNull();
+		assertThat(keys.getApiKey()).isEqualTo(original.getApiKey());
+		assertThat(keys.getSecretKey()).isEqualTo(original.getSecretKey());
 	}
 }

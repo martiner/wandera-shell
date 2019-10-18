@@ -26,18 +26,60 @@ import cz.geek.wandera.shell.keys.WanderaKeys;
 @RestClientTest(RestService.class)
 public class WanderaSigningInterceptorTest {
 
+	private static final Instant TIMESTAMP = Instant.ofEpochSecond(3600);
+
 	@Autowired
 	private MockRestServiceServer server;
 
 	@Autowired
 	private RestService service;
 
+	@Autowired
+	private KeysHolder holder;
+
 	@Test
 	public void shouldAddHeaders() throws Exception {
+		WanderaKeys keys = new WanderaKeys("api", "secret");
+		holder.hold(keys);
+
 		server.expect(requestTo("http://localhost/test"))
 				.andExpect(header("X-Sig", is(notNullValue())))
-				.andExpect(header("X-Ts", is("3600000")))
-				.andExpect(header("X-Key", is("api")))
+				.andExpect(header("X-Ts", is(Long.toString(TIMESTAMP.toEpochMilli()))))
+				.andExpect(header("X-Key", is(keys.getApiKey())))
+				// Spring 5.2 .andExpect(headerDoesNotExist("X-Service"))
+				// Spring 5.2 .andExpect(headerDoesNotExist("X-Connector-Node"))
+				.andRespond(withSuccess());
+
+		service.exchange(RestRequest.create(GET, "http://localhost/test").build());
+	}
+
+	@Test
+	public void shouldAddServiceHeaders() throws Exception {
+		WanderaKeys keys = new WanderaKeys("api", "secret", "service", null);
+		holder.hold(keys);
+
+		server.expect(requestTo("http://localhost/test"))
+				.andExpect(header("X-Sig", is(notNullValue())))
+				.andExpect(header("X-Ts", is(Long.toString(TIMESTAMP.toEpochMilli()))))
+				.andExpect(header("X-Key", is(keys.getApiKey())))
+				.andExpect(header("X-Service", is(keys.getService())))
+				// Spring 5.2 .andExpect(headerDoesNotExist("X-Connector-Node"))
+				.andRespond(withSuccess());
+
+		service.exchange(RestRequest.create(GET, "http://localhost/test").build());
+	}
+
+	@Test
+	public void shouldAddConnectorHeaders() throws Exception {
+		WanderaKeys keys = new WanderaKeys("api", "secret", null, "node");
+		holder.hold(keys);
+
+		server.expect(requestTo("http://localhost/test"))
+				.andExpect(header("X-Sig", is(notNullValue())))
+				.andExpect(header("X-Ts", is(Long.toString(TIMESTAMP.toEpochMilli()))))
+				.andExpect(header("X-Key", is(keys.getApiKey())))
+				.andExpect(header("X-Connector-Node", is(keys.getConnectorNode())))
+				// Spring 5.2 .andExpect(headerDoesNotExist("X-Service"))
 				.andRespond(withSuccess());
 
 		service.exchange(RestRequest.create(GET, "http://localhost/test").build());
@@ -45,11 +87,13 @@ public class WanderaSigningInterceptorTest {
 
 	static class Config {
 
-		@Bean WanderaSigningInterceptor interceptor() {
-			WanderaKeys keys = new WanderaKeys("api", "secret");
-			Clock clock = Clock.fixed(Instant.ofEpochSecond(3600), ZoneId.systemDefault());
-			return new WanderaSigningInterceptor(new KeysHolder(keys), clock);
+		@Bean WanderaSigningInterceptor interceptor(KeysHolder holder) {
+			Clock clock = Clock.fixed(TIMESTAMP, ZoneId.systemDefault());
+			return new WanderaSigningInterceptor(holder, clock);
 		}
 
+		@Bean KeysHolder holder() {
+			return new KeysHolder();
+		}
 	}
 }

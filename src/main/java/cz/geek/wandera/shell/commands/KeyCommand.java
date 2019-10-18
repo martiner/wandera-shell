@@ -1,9 +1,12 @@
 package cz.geek.wandera.shell.commands;
 
+import static org.springframework.shell.standard.ShellOption.NULL;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
@@ -32,13 +35,15 @@ public class KeyCommand {
 	}
 
 	@ShellMethod(key = "key set", value = "Set keys")
-	public void key(String api, String secret) {
-		holder.hold(new WanderaKeys(api, secret));
+	public void key(String api, String secret,
+			@ShellOption(defaultValue = NULL) String service, @ShellOption(defaultValue = NULL) String connectorNode) {
+		holder.hold(new WanderaKeys(api, secret, service, connectorNode));
 	}
 
 	@ShellMethod(key = "key save", value = "Set and save keys")
-	public void keySave(String name, String api, String secret) {
-		WanderaKeys keys = new WanderaKeys(api, secret);
+	public void keySave(String name, String api, String secret,
+			@ShellOption(defaultValue = NULL) String service, @ShellOption(defaultValue = NULL) String connectorNode) {
+		WanderaKeys keys = new WanderaKeys(api, secret, service, connectorNode);
 		holder.hold(keys);
 		repository.store(name, keys);
 	}
@@ -55,13 +60,17 @@ public class KeyCommand {
 				.addRow()
 				.addValue("Name")
 				.addValue("API key")
-				.addValue("Secret key");
+				.addValue("Secret key")
+				.addValue("Service")
+				.addValue("Connector Node");
 
 		repository.list().forEach((name, value) ->
 				model.addRow()
 						.addValue(name)
 						.addValue(value.getApiKey())
-						.addValue(value.getSecretKey()));
+						.addValue(value.getSecretKey())
+						.addValue(value.getService())
+						.addValue(value.getConnectorNode()));
 
 		return new TableBuilder(model.build())
 				.addHeaderAndVerticalsBorders(BorderStyle.oldschool)

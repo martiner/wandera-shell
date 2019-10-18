@@ -21,6 +21,8 @@ public class KeysRepository  {
 	private static final String KEYS_PREFIX = "keys";
 	private static final String API = "api";
 	private static final String SECRET = "secret";
+	private static final String SERVICE = "service";
+	private static final String CONNECTOR_NODE = "connectorNode";
 	private static final String DEFAULT_KEY_NAME = "key.default";
 
 	private final Path keysFile;
@@ -31,8 +33,14 @@ public class KeysRepository  {
 
 	public void store(String name, WanderaKeys keys) {
 		Properties properties = loadProperties();
-		properties.put(apiName(name), keys.getApiKey());
-		properties.put(secretName(name), keys.getSecretKey());
+		properties.put(createPropertyName(name, API), keys.getApiKey());
+		properties.put(createPropertyName(name, SECRET), keys.getSecretKey());
+		if (keys.getService() != null) {
+			properties.put(createPropertyName(name, SERVICE), keys.getService());
+		}
+		if (keys.getConnectorNode() != null) {
+			properties.put(createPropertyName(name, CONNECTOR_NODE), keys.getConnectorNode());
+		}
 		storeDefault(properties, name);
 		saveProperties(properties);
 	}
@@ -66,13 +74,15 @@ public class KeysRepository  {
 	}
 
 	private WanderaKeys getKeys(Properties properties, String name) {
-		String api = properties.getProperty(apiName(name));
-		String secret = properties.getProperty(secretName(name));
+		String api = properties.getProperty(createPropertyName(name, API));
+		String secret = properties.getProperty(createPropertyName(name, SECRET));
+		String service = properties.getProperty(createPropertyName(name, SERVICE));
+		String connectorNode = properties.getProperty(createPropertyName(name, CONNECTOR_NODE));
 
 		if (api == null || secret == null) {
 			throw new IllegalArgumentException("Keys named " + name + " don't exist");
 		}
-		return new WanderaKeys(api, secret);
+		return new WanderaKeys(api, secret, service, connectorNode);
 	}
 
 	public Map<String, WanderaKeys> list() {
@@ -100,6 +110,10 @@ public class KeysRepository  {
 			wk.setApiKey(value);
 		} else if (SECRET.equals(suffix)) {
 			wk.setSecretKey(value);
+		} else if (SERVICE.equals(suffix)) {
+			wk.setService(value);
+		} else if (CONNECTOR_NODE.equals(suffix)) {
+			wk.setConnectorNode(value);
 		} else {
 			return;
 		}
@@ -127,11 +141,8 @@ public class KeysRepository  {
 		}
 	}
 
-	private static String secretName(String name) {
-		return KEYS_PREFIX + DELIMITER + name + DELIMITER + SECRET;
+	private static String createPropertyName(String name, String property) {
+		return KEYS_PREFIX + DELIMITER + name + DELIMITER + property;
 	}
 
-	private static String apiName(String name) {
-		return KEYS_PREFIX + DELIMITER + name + DELIMITER + API;
-	}
 }
