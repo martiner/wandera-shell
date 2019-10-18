@@ -2,6 +2,10 @@ package cz.geek.wandera.shell.keys;
 
 public class WanderaKeys {
 
+	public static final String KEY_HEADER = "X-Key";
+	public static final String SIG_HEADER = "X-Sig";
+	public static final String TIMESTAMP_HEADER = "X-TS";
+
 	private String apiKey;
 
 	private String secretKey;
