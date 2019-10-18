@@ -35,6 +35,14 @@ public class RestService {
 		return restTemplate.exchange(requestUri, request.getMethod(), entity, byte[].class);
 	}
 
+	public boolean hasLastUri() {
+		return lastUri != null;
+	}
+
+	public URI getLastUri() {
+		return lastUri;
+	}
+
 	void clearLastUri() {
 		lastUri = null;
 	}
@@ -51,7 +59,7 @@ public class RestService {
 	private URI createUri(String uriString) {
 		URI uri = URI.create(uriString);
 		if (!uri.isAbsolute()) {
-			if (lastUri == null) {
+			if (!hasLastUri()) {
 				throw new UnableToResolveUriException("URI is not absolute and no last URI to resolve");
 			}
 			uri = lastUri.resolve(uri);
