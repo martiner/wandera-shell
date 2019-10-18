@@ -44,7 +44,7 @@ public class KeysRepositoryTest {
 	@Test
 	@Parameters(method = "keys")
 	public void shouldStoreLoadAndListKeys(WanderaKeys original) throws Exception {
-		repository.store("foo", original);
+		repository.store(original);
 
 		WanderaKeys keys = repository.loadAndSaveDefault("foo");
 		assertKeysEqual(original, keys);
@@ -62,9 +62,9 @@ public class KeysRepositoryTest {
 
 	public Object[][] keys() {
 		return new Object[][] {
-				new Object[] { new WanderaKeys("API", "SECRET") },
-				new Object[] { new WanderaKeys("API", "SECRET", "SERVICE", null) },
-				new Object[] { new WanderaKeys("API", "SECRET", null, "NODE") },
+				new Object[] { new WanderaKeys("foo", "API", "SECRET", null, null) },
+				new Object[] { new WanderaKeys("foo", "API", "SECRET", "SERVICE", null) },
+				new Object[] { new WanderaKeys("foo", "API", "SECRET", null, "NODE") },
 		};
 	}
 	private void assertKeysEqual(WanderaKeys original, WanderaKeys keys) {

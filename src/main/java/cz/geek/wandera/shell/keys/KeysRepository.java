@@ -31,17 +31,17 @@ public class KeysRepository  {
 		keysFile = directory.getKeysFile();
 	}
 
-	public void store(String name, WanderaKeys keys) {
+	public void store(WanderaKeys keys) {
 		Properties properties = loadProperties();
-		properties.put(createPropertyName(name, API), keys.getApiKey());
-		properties.put(createPropertyName(name, SECRET), keys.getSecretKey());
+		properties.put(createPropertyName(keys.getName(), API), keys.getApiKey());
+		properties.put(createPropertyName(keys.getName(), SECRET), keys.getSecretKey());
 		if (keys.getService() != null) {
-			properties.put(createPropertyName(name, SERVICE), keys.getService());
+			properties.put(createPropertyName(keys.getName(), SERVICE), keys.getService());
 		}
 		if (keys.getConnectorNode() != null) {
-			properties.put(createPropertyName(name, CONNECTOR_NODE), keys.getConnectorNode());
+			properties.put(createPropertyName(keys.getName(), CONNECTOR_NODE), keys.getConnectorNode());
 		}
-		storeDefault(properties, name);
+		storeDefault(properties, keys.getName());
 		saveProperties(properties);
 	}
 
@@ -82,7 +82,7 @@ public class KeysRepository  {
 		if (api == null || secret == null) {
 			throw new IllegalArgumentException("Keys named " + name + " don't exist");
 		}
-		return new WanderaKeys(api, secret, service, connectorNode);
+		return new WanderaKeys(name, api, secret, service, connectorNode);
 	}
 
 	public Map<String, WanderaKeys> list() {

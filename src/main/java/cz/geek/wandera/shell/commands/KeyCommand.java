@@ -43,9 +43,9 @@ public class KeyCommand {
 	@ShellMethod(key = "key save", value = "Set and save keys")
 	public void keySave(String name, String api, String secret,
 			@ShellOption(defaultValue = NULL) String service, @ShellOption(defaultValue = NULL) String connectorNode) {
-		WanderaKeys keys = new WanderaKeys(api, secret, service, connectorNode);
+		WanderaKeys keys = new WanderaKeys(name, api, secret, service, connectorNode);
 		holder.hold(keys);
-		repository.store(name, keys);
+		repository.store(keys);
 	}
 
 	@ShellMethod(key = "key use", value = "Use saved keys")

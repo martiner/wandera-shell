@@ -14,6 +14,8 @@ public class WanderaKeys {
 	public static final String SERVICE_HEADER = "X-Service";
 	public static final String CONNECTOR_NODE_HEADER = "X-Connector-Node";
 
+	private String name;
+
 	private String apiKey;
 
 	private String secretKey;
@@ -26,18 +28,30 @@ public class WanderaKeys {
 	}
 
 	public WanderaKeys(String apiKey, String secretKey) {
-		this.apiKey = apiKey;
-		this.secretKey = secretKey;
+		this(apiKey, secretKey, null, null);
 	}
 
 	public WanderaKeys(String apiKey, String secretKey, String service, String connectorNode) {
+		this(null, apiKey, secretKey, service, connectorNode);
+	}
+
+	public WanderaKeys(String name, String apiKey, String secretKey, String service, String connectorNode) {
 		if (service != null && connectorNode != null) {
 			throw new IllegalArgumentException("service and connectorNode are mutually exclusive");
 		}
+		this.name = name;
 		this.apiKey = apiKey;
 		this.secretKey = secretKey;
 		this.service = service;
 		this.connectorNode = connectorNode;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void setApiKey(String apiKey) {
