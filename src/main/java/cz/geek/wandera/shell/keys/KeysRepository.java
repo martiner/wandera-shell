@@ -1,5 +1,10 @@
 package cz.geek.wandera.shell.keys;
 
+import static cz.geek.wandera.shell.keys.RepositoryProp.API;
+import static cz.geek.wandera.shell.keys.RepositoryProp.CONNECTOR_NODE;
+import static cz.geek.wandera.shell.keys.RepositoryProp.SECRET;
+import static cz.geek.wandera.shell.keys.RepositoryProp.SERVICE;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,10 +24,6 @@ public class KeysRepository  {
 
 	private static final String DELIMITER = ".";
 	private static final String KEYS_PREFIX = "keys";
-	private static final String API = "api";
-	private static final String SECRET = "secret";
-	private static final String SERVICE = "service";
-	private static final String CONNECTOR_NODE = "connectorNode";
 	private static final String DEFAULT_KEY_NAME = "key.default";
 
 	private final Path keysFile;
@@ -33,14 +34,11 @@ public class KeysRepository  {
 
 	public void store(WanderaKeys keys) {
 		Properties properties = loadProperties();
-		properties.put(createPropertyName(keys.getName(), API), keys.getApiKey());
-		properties.put(createPropertyName(keys.getName(), SECRET), keys.getSecretKey());
-		if (keys.getService() != null) {
-			properties.put(createPropertyName(keys.getName(), SERVICE), keys.getService());
-		}
-		if (keys.getConnectorNode() != null) {
-			properties.put(createPropertyName(keys.getName(), CONNECTOR_NODE), keys.getConnectorNode());
-		}
+
+		RepositoryProp.stream()
+				.filter(prop -> prop.hasValue(keys))
+				.forEach(prop -> properties.put(createPropertyName(keys.getName(), prop), prop.getValue(keys)));
+
 		storeDefault(properties, keys.getName());
 		saveProperties(properties);
 	}
@@ -105,19 +103,14 @@ public class KeysRepository  {
 		if (!KEYS_PREFIX.equals(prefix)) {
 			return;
 		}
+
 		WanderaKeys wk = keys.getOrDefault(name, new WanderaKeys());
-		if (API.equals(suffix)) {
-			wk.setApiKey(value);
-		} else if (SECRET.equals(suffix)) {
-			wk.setSecretKey(value);
-		} else if (SERVICE.equals(suffix)) {
-			wk.setService(value);
-		} else if (CONNECTOR_NODE.equals(suffix)) {
-			wk.setConnectorNode(value);
-		} else {
-			return;
-		}
-		keys.put(name, wk);
+		RepositoryProp.stream()
+				.filter(prop -> prop.hasPropertyName(suffix))
+				.peek(prop -> prop.setValue(wk, value))
+				.findFirst()
+				.map(prop -> keys.put(name, wk))
+		;
 	}
 
 	private Properties loadProperties() {
@@ -141,8 +134,8 @@ public class KeysRepository  {
 		}
 	}
 
-	private static String createPropertyName(String name, String property) {
-		return KEYS_PREFIX + DELIMITER + name + DELIMITER + property;
+	private static String createPropertyName(String name, RepositoryProp property) {
+		return KEYS_PREFIX + DELIMITER + name + DELIMITER + property.getPropertyName();
 	}
 
 }
