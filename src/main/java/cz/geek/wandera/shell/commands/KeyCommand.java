@@ -2,6 +2,8 @@ package cz.geek.wandera.shell.commands;
 
 import static org.springframework.shell.standard.ShellOption.NULL;
 
+import java.util.Objects;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.shell.standard.ShellComponent;
@@ -52,6 +54,14 @@ public class KeyCommand {
 	public void keyUse(String name) {
 		WanderaKeys keys = repository.loadAndSaveDefault(name);
 		holder.hold(keys);
+	}
+
+	@ShellMethod(key = "key delete", value = "Delete saved keys")
+	public void keyDelete(String name) {
+		repository.delete(name);
+		if (holder.hasKeys() && Objects.equals(holder.getKeys().getName(), name)) {
+			holder.hold(null);
+		}
 	}
 
 	@ShellMethod(key = "key list", value = "List all keys")

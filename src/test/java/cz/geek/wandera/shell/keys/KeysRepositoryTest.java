@@ -58,6 +58,10 @@ public class KeysRepositoryTest {
 
 		WanderaKeys fooKey = keysMap.get("foo");
 		assertKeysEqual(original, fooKey);
+
+		repository.delete("foo");
+
+		assertThat(repository.list()).isEmpty();
 	}
 
 	public Object[][] keys() {

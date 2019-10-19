@@ -47,6 +47,21 @@ public class KeysRepository  {
 		properties.put(DEFAULT_KEY_NAME, name);
 	}
 
+	private void deleteDefault(Properties properties, String name) {
+		properties.remove(DEFAULT_KEY_NAME, name);
+	}
+
+	public void delete(String name) {
+		Properties properties = loadProperties();
+
+		RepositoryProp.stream()
+				.map(prop -> createPropertyName(name, prop))
+				.forEach(properties::remove);
+
+		deleteDefault(properties, name);
+		saveProperties(properties);
+	}
+
 	public WanderaKeys loadAndSaveDefault(String name) {
 		Properties properties = loadProperties();
 		WanderaKeys keys = getKeys(properties, name);
