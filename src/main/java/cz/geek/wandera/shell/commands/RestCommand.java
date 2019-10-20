@@ -26,6 +26,15 @@ import cz.geek.wandera.shell.rest.RestService;
 @ShellComponent
 public class RestCommand {
 
+	private static final String URI = "Absolute URI of request or relative URI resolved according to previous request";
+	private static final String HEADER = "request header in form 'name=value'";
+	private static final String JQ = "jq expression to be applied JSON response";
+	private static final String TARGET = "save response to file";
+	private static final String RAW = "show raw response (don't format JSON)";
+	private static final String HEADERS = "show response headers";
+	private static final String DATA = "data to be send with request";
+	private static final String SOURCE = "load data to be send with request from file";
+
 	private final RestService service;
 	private final RestProcessor processor;
 	private final KeysHolder keysHolder;
@@ -44,11 +53,13 @@ public class RestCommand {
 	}
 
 	@ShellMethod("Issue GET request")
-	public String get(String uri, @ShellOption(defaultValue = NULL) String jq,
-			@ShellOption(defaultValue = NULL) HttpHeader header,
-			@ShellOption(defaultValue = NULL) File target,
-			@ShellOption(defaultValue = "false") boolean raw,
-			@ShellOption(defaultValue = "false") boolean headers
+	public String get(
+			@ShellOption(help = URI) String uri,
+			@ShellOption(defaultValue = NULL, help = JQ) String jq,
+			@ShellOption(defaultValue = NULL, help = HEADER) HttpHeader header,
+			@ShellOption(defaultValue = NULL, help = TARGET) File target,
+			@ShellOption(defaultValue = "false", help = RAW) boolean raw,
+			@ShellOption(defaultValue = "false", help = HEADERS) boolean headers
 			) throws IOException {
 		RestRequest request = RestRequest.create(GET, uri).headers(header).build();
 		ResponseEntity<byte[]> response = service.exchange(request);
@@ -56,13 +67,15 @@ public class RestCommand {
 	}
 
 	@ShellMethod("Issue POST request")
-	public String post(String uri, @ShellOption(defaultValue = NULL) String jq,
-			@ShellOption(defaultValue = NULL) HttpHeader header,
-			@ShellOption(defaultValue = NULL) String data,
-			@ShellOption(defaultValue = NULL) File source,
-			@ShellOption(defaultValue = NULL) File target,
-			@ShellOption(defaultValue = "false") boolean raw,
-			@ShellOption(defaultValue = "false") boolean headers
+	public String post(
+			@ShellOption(help = URI) String uri,
+			@ShellOption(defaultValue = NULL, help = JQ) String jq,
+			@ShellOption(defaultValue = NULL, help = HEADER) HttpHeader header,
+			@ShellOption(defaultValue = NULL, help = DATA) String data,
+			@ShellOption(defaultValue = NULL, help = SOURCE) File source,
+			@ShellOption(defaultValue = NULL, help = TARGET) File target,
+			@ShellOption(defaultValue = "false", help = RAW) boolean raw,
+			@ShellOption(defaultValue = "false", help = HEADERS) boolean headers
 			) throws IOException {
 		RestRequest request = RestRequest.create(POST, uri).headers(header).data(data).data(source).build();
 		ResponseEntity<byte[]> response = service.exchange(request);
@@ -70,13 +83,15 @@ public class RestCommand {
 	}
 
 	@ShellMethod("Issue PUT request")
-	public String put(String uri, @ShellOption(defaultValue = NULL) String jq,
-			@ShellOption(defaultValue = NULL) HttpHeader header,
-			@ShellOption(defaultValue = NULL) String data,
-			@ShellOption(defaultValue = NULL) File source,
-			@ShellOption(defaultValue = NULL) File target,
-			@ShellOption(defaultValue = "false") boolean raw,
-			@ShellOption(defaultValue = "false") boolean headers
+	public String put(
+			@ShellOption(help = URI) String uri,
+			@ShellOption(defaultValue = NULL, help = JQ) String jq,
+			@ShellOption(defaultValue = NULL, help = HEADER) HttpHeader header,
+			@ShellOption(defaultValue = NULL, help = DATA) String data,
+			@ShellOption(defaultValue = NULL, help = SOURCE) File source,
+			@ShellOption(defaultValue = NULL, help = TARGET) File target,
+			@ShellOption(defaultValue = "false", help = RAW) boolean raw,
+			@ShellOption(defaultValue = "false", help = HEADERS) boolean headers
 			) throws IOException {
 		RestRequest request = RestRequest.create(PUT, uri).headers(header).data(data).data(source).build();
 		ResponseEntity<byte[]> response = service.exchange(request);
@@ -84,10 +99,11 @@ public class RestCommand {
 	}
 
 	@ShellMethod("Issue DELETE request")
-	public String delete(String uri,
-			@ShellOption(defaultValue = NULL) HttpHeader header,
-			@ShellOption(defaultValue = "false") boolean raw,
-			@ShellOption(defaultValue = "false") boolean headers
+	public String delete(
+			@ShellOption(help = URI) String uri,
+			@ShellOption(defaultValue = NULL, help = HEADER) HttpHeader header,
+			@ShellOption(defaultValue = "false", help = RAW) boolean raw,
+			@ShellOption(defaultValue = "false", help = HEADERS) boolean headers
 			) throws IOException {
 		RestRequest request = RestRequest.create(DELETE, uri).headers(header).build();
 		ResponseEntity<byte[]> response = service.exchange(request);

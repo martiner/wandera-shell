@@ -36,13 +36,13 @@ public class KeyCommand {
 		}
 	}
 
-	@ShellMethod(key = "key set", value = "Set keys")
+	@ShellMethod(key = "key set", value = "Add but don't save keys")
 	public void key(String api, String secret,
 			@ShellOption(defaultValue = NULL) String service, @ShellOption(defaultValue = NULL) String connectorNode) {
 		holder.hold(new WanderaKeys(api, secret, service, connectorNode));
 	}
 
-	@ShellMethod(key = "key save", value = "Set and save keys")
+	@ShellMethod(key = "key add", value = "Add and save keys")
 	public void keySave(String name, String api, String secret,
 			@ShellOption(defaultValue = NULL) String service, @ShellOption(defaultValue = NULL) String connectorNode) {
 		WanderaKeys keys = new WanderaKeys(name, api, secret, service, connectorNode);
@@ -64,7 +64,7 @@ public class KeyCommand {
 		}
 	}
 
-	@ShellMethod(key = "key list", value = "List all keys")
+	@ShellMethod(key = "key list", value = "List saved keys")
 	public String keyList() {
 		TableModelBuilder<String> model = new TableModelBuilder<String>()
 				.addRow()
